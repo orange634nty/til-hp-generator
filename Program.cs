@@ -1,12 +1,19 @@
 using System;
+using RazorLight;
+using System.Threading.Tasks;
 
 namespace til_hp_generator
 {
     class Program
     {
-        static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            string template = "Hello @Model.Name, welcome to RazorEngine!";
+            var engine = new RazorLightEngineBuilder()
+              .UseMemoryCachingProvider()
+              .Build();
+            string result = await engine.CompileRenderAsync("templateKey", template, new { Name = "World" });
+            Console.WriteLine(result);
         }
     }
 }
