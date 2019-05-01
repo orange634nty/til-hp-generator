@@ -22,6 +22,11 @@ public class MkModel
         convertHtml = ConvertToHtml(fileFullPath);
     }
 
+    /// <summary>
+    /// get html path
+    /// </summary>
+    /// <param name="outDir">out put dir</param>
+    /// <returns>html file path</returns>
     public string HtmlFilePath(string outDir)
     {
         string htmlFileName = $"{Path.GetFileNameWithoutExtension(fileFullPath)}.html";
@@ -29,6 +34,12 @@ public class MkModel
         return Path.Combine(outDir, Path.Combine(htmlFileDir, htmlFileName));
     }
 
+    /// <summary>
+    /// get relative path
+    /// </summary>
+    /// <param name="filePath">file path</param>
+    /// <param name="basePath">base path</param>
+    /// <returns>relative path</returns>
     private string GetRelativePath(string filePath, string basePath)
     {
         Uri filePathUri = new Uri(filePath);

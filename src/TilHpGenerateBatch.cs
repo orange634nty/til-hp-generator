@@ -8,6 +8,12 @@ using MicroBatchFramework;
 
 public class TilHpGenerateBatch : BatchBase
 {
+    /// <summary>
+    /// build task
+    /// </summary>
+    /// <param name="inputDir">option -i input dir</param>
+    /// <param name="outputDir">option -o output dir</param>
+    /// <param name="tplDir">option -t template dir</param>
     public async Task Build(
         [Option("-i", "input dir")]string inputDir,
         [Option("-o", "output dir")]string outputDir,
@@ -16,12 +22,5 @@ public class TilHpGenerateBatch : BatchBase
     {
         var thGenerator = new TilHpGenerator();
         await thGenerator.Build(inputDir, outputDir, tplDir);
-        // var mkModel = new MkModel("./sampleMk/blog.mk");
-        // var engine = new RazorLightEngineBuilder()
-        //     .UseFilesystemProject(Directory.GetCurrentDirectory())
-        //     .UseMemoryCachingProvider()
-        //     .Build();
-        // string result = await engine.CompileRenderAsync("tpl/index.cshtml", new { Title = "test title", ArticleText = mkModel.convertHtml });
-        // Console.WriteLine(result);
     }
 }

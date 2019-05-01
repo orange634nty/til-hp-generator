@@ -10,8 +10,11 @@ using MicroBatchFramework;
 public class TilHpGenerator
 {
     /// <summary>
-    /// Build
+    /// build html pages
     /// </summary>
+    /// <param name="inputDir">directory which markdown file exist</param>
+    /// <param name="outputDir">directory which html file generate</param>
+    /// <param name="tplDir" >directory which cshtml file exist</param>
     public async Task Build(string inputDir, string outputDir, string tplDir)
     {
         var engine = new RazorLightEngineBuilder()
@@ -39,6 +42,10 @@ public class TilHpGenerator
         }
     }
 
+    /// <summary>
+    /// get all markdow file from target directory
+    /// </summary>
+    /// <param name="dirPath">taerget directory</param>
     private IEnumerable<MkModel> GetMkModelsFromDir(string dirPath)
     {
         return Directory.EnumerateFiles(dirPath, "*.md", SearchOption.AllDirectories)
