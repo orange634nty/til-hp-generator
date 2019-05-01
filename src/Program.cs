@@ -10,6 +10,6 @@ public class Program
     /// <param name="args">Command Line Args</param>
     static async Task Main(string[] args)
     {
-        await BatchHost.CreateDefaultBuilder().RunBatchEngineAsync<TilHpGenerator>(args);
+        await BatchHost.CreateDefaultBuilder().RunBatchEngineAsync<TilHpGenerateBatch>(args);
     }
 }
