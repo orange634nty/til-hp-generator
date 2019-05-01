@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using RazorLight;
 using System.Threading.Tasks;
 using Markdig;
@@ -9,13 +10,13 @@ namespace til_hp_generator
     {
         public static async Task Main(string[] args)
         {
-            string mkText = "# Discription\nI'm trying to make add using *RazorLight* *Markdig* *MicroBathFramework* for til.";
-            var mk = Markdown.ToHtml(mkText);
-            string template = "Hello this is my new article\n@Raw(@Model.mk)\nAnd that all! thank you!";
+            string mkText = File.ReadAllText(Directory.GetCurrentDirectory() + "/sampleMk/blog.mk");
+            var articleText = Markdown.ToHtml(mkText);
             var engine = new RazorLightEngineBuilder()
+              .UseFilesystemProject(Directory.GetCurrentDirectory())
               .UseMemoryCachingProvider()
               .Build();
-            string result = await engine.CompileRenderAsync("templateKey", template, new { mk = mk });
+            string result = await engine.CompileRenderAsync("tpl/index.cshtml", new { Title = "test title", ArticleText = articleText });
             Console.WriteLine(result);
         }
     }
