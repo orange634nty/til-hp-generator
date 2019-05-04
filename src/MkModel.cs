@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Markdig;
+using RazorLight;
 
 public class MkModel
 {
@@ -18,20 +20,53 @@ public class MkModel
     {
         fileFullPath = _fileFullPath;
         relativePath = GetRelativePath(fileFullPath, basePath);
-        fileName = Path.GetFileName(fileFullPath);
+        fileName = Path.GetFileNameWithoutExtension(fileFullPath);
         convertHtml = ConvertToHtml(fileFullPath);
     }
 
     /// <summary>
-    /// get html path
+    /// create or over write html file
     /// </summary>
-    /// <param name="outDir">out put dir</param>
-    /// <returns>html file path</returns>
-    public string HtmlFilePath(string outDir)
+    /// <param name="engine">RazorLightEngin Instance</param>
+    /// <param name="cshtmlPath">cshtml template file</param>
+    /// <param name="outputDir">out put directory</param>
+    public async Task CreateOrOverWrite(RazorLightEngine engine, string cshtmlPath, string outputDir)
     {
-        string htmlFileName = $"{Path.GetFileNameWithoutExtension(fileFullPath)}.html";
+        string result = await engine.CompileRenderAsync(cshtmlPath, new { title = fileName, articleText = convertHtml });
+        string htmlFilePath = HtmlFilePath(outputDir);
+        Console.WriteLine($"[Generate] : {htmlFilePath}");
+
+        // create directory if not exist
+        string htmlFileDir = Path.GetDirectoryName(htmlFilePath);
+        if (!Directory.Exists(htmlFileDir))
+        {
+            Directory.CreateDirectory(htmlFileDir);
+        }
+
+        // over write or create file
+        if (File.Exists(htmlFilePath))
+        {
+            File.WriteAllText(htmlFilePath, result);
+        }
+        else
+        {
+            using (FileStream fs = File.Create(htmlFilePath))
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                sw.WriteLine(result);
+            }
+        }
+    }
+
+    /// <summary>
+    /// get relative html file
+    /// </summary>
+    /// <returns> relative html path</returns>
+    public string RelativeHtmlFilePath()
+    {
+        string htmlFileName = $"{fileName}.html";
         string htmlFileDir = Path.GetDirectoryName(relativePath);
-        return Path.Combine(outDir, Path.Combine(htmlFileDir, htmlFileName));
+        return Path.Combine(htmlFileDir, htmlFileName);
     }
 
     /// <summary>
@@ -45,7 +80,16 @@ public class MkModel
         Uri filePathUri = new Uri(filePath);
         Uri basePathUri = new Uri(basePath);
         return basePathUri.MakeRelativeUri(filePathUri).ToString();
+    }
 
+    /// <summary>
+    /// get html path
+    /// </summary>
+    /// <param name="outDir">out put dir</param>
+    /// <returns>html file path</returns>
+    private string HtmlFilePath(string outDir)
+    {
+        return Path.Combine(outDir, RelativeHtmlFilePath());
     }
 
     /// <summary>

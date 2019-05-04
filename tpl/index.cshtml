@@ -8,8 +8,10 @@
     </head>
     <body>
         <main>
-            <h1>@Model.Title</h1>
-            @Raw(Model.ArticleText)
+            <h1>All Article</h1>
+            @foreach (var mkModel in Model.mkModels) {
+                <a href="@mkModel.RelativeHtmlFilePath()">@mkModel.fileName</a>
+            }
         </main>
     </body>
 </html>

@@ -31,37 +31,17 @@ public class TilHpGenerator
         IEnumerable<MkModel> mkModels = GetMkModelsFromDir(inputDir);
         foreach (var mkModel in mkModels)
         {
-            string result = await engine.CompileRenderAsync(Path.Combine(tplDir, "index.cshtml"), new { Title = mkModel.fileName, ArticleText = mkModel.convertHtml });
-            string htmlFilePath = mkModel.HtmlFilePath(outputDir);
-            Console.WriteLine(htmlFilePath);
-
-            // create directory if not exist
-            string htmlFileDir = Path.GetDirectoryName(htmlFilePath);
-            if (!Directory.Exists(htmlFileDir))
-            {
-                Directory.CreateDirectory(htmlFileDir);
-            }
-
-            // over write or create file
-            if (File.Exists(htmlFilePath))
-            {
-                File.WriteAllText(htmlFilePath, result);
-            }
-            else
-            {
-                using (FileStream fs = File.Create(htmlFilePath))
-                using (StreamWriter sw = new StreamWriter(fs))
-                {
-                    sw.WriteLine(result);
-                }
-            }
+            await mkModel.CreateOrOverWrite(engine, Path.Combine(tplDir, "article.cshtml"), outputDir);
         }
+
+        await GenerateTopPageHtml(engine, mkModels, Path.Combine(tplDir, "index.cshtml"), outputDir);
+
 
         // copy images
         IEnumerable<string> imgFilePaths = GetImageFileFromDir(inputDir);
         foreach (var imgFilePath in imgFilePaths)
         {
-            Console.WriteLine(imgFilePath);
+            Console.WriteLine($"[Copy] : {imgFilePath}");
             // create img copy directory
             string imgDir = Path.GetDirectoryName(Path.Combine(outputDir, imgFilePath));
             if (!Directory.Exists(imgDir))
@@ -71,6 +51,35 @@ public class TilHpGenerator
 
             // copy file
             File.Copy(Path.Combine(inputDir, imgFilePath), Path.Combine(outputDir, imgFilePath), true);
+        }
+    }
+
+    /// <summary>
+    /// generate top page of html
+    /// </summary>
+    /// <param name="engine"></param>
+    /// <param name="mkModels"></param>
+    /// <param name="cshtmlPath"></param>
+    /// <param name="outputDir"></param>
+    private async Task GenerateTopPageHtml(RazorLightEngine engine, IEnumerable<MkModel> mkModels, string cshtmlPath, string outputDir)
+    {
+        // generate HP top page
+        string result = await engine.CompileRenderAsync(cshtmlPath, new { mkModels = mkModels });
+        string htmlFilePath = Path.Combine(outputDir, "index.html");
+        Console.WriteLine($"[Generate] : {htmlFilePath}");
+
+        // over write or create file
+        if (File.Exists(htmlFilePath))
+        {
+            File.WriteAllText(htmlFilePath, result);
+        }
+        else
+        {
+            using (FileStream fs = File.Create(htmlFilePath))
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                sw.WriteLine(result);
+            }
         }
     }
 
@@ -99,6 +108,7 @@ public class TilHpGenerator
     private IEnumerable<MkModel> GetMkModelsFromDir(string dirPath)
     {
         return Directory.EnumerateFiles(dirPath, "*.md", SearchOption.AllDirectories)
+            .Where((filePath, index) => !filePath.Contains("README"))
             .Select((filePath, index) => new MkModel(filePath, dirPath));
     }
 }
